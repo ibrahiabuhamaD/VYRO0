@@ -1,0 +1,11 @@
+{
+  "name": "vyro-social-video",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "test:smoke": "node scripts/smoke-test.mjs"
+  }
+}
