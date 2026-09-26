@@ -10,10 +10,10 @@ import { fileURLToPath } from 'node:url';
 import { db } from './server/db.js';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
-const uploadDirectory = fileURLToPath(new URL('./server/uploads/', import.meta.url));
+const uploadDirectory = resolve(root, process.env.VYRO_UPLOAD_DIR || 'server/uploads');
 await mkdir(uploadDirectory, { recursive: true });
 const port = Number(process.env.PORT || 4173);
-const host = process.env.HOST || '127.0.0.1';
+const host = process.env.HOST || (process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1');
 const sessionLifetime = 7 * 24 * 60 * 60 * 1000;
 const maxVideoBytes = 50 * 1024 * 1024;
 const scrypt = promisify(scryptCallback);
@@ -202,6 +202,10 @@ async function uploadVideo(request, response, user) {
 
 async function handleApi(request, response, url, user) {
   const path = url.pathname;
+  if (path === '/api/health' && request.method === 'GET') {
+    db.prepare('SELECT 1').get();
+    return json(response, 200, { status: 'ok' });
+  }
   if (path === '/api/auth/register' && request.method === 'POST') return register(request, response);
   if (path === '/api/auth/login' && request.method === 'POST') return login(request, response);
   if (path === '/api/auth/logout' && request.method === 'POST') {
